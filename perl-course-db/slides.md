@@ -7,11 +7,22 @@ class: center, middle
 # SQL
 
 ```sql
+SELECT name, surname
+FROM users
+WHERE age > 18;
+```
+
+```sql
+SELECT balance
+FROM account
+WHERE user_id = 81858
+```
+
+```sql
 SELECT *
 FROM users u JOIN accounts a
   ON u.id = a.user_id
 WHERE account.balance > 0
-LIMIT 10
 ```
 
 ---
@@ -556,6 +567,41 @@ $schema->storage->dbh();
 
 ---
 
+# DBIx::Class::Schema::Loader
+
+```perl
+use DBIx::Class::Schema::Loader qw/ make_schema_at /;
+make_schema_at(
+    'My::Schema',
+    { debug => 1,
+      dump_directory => './lib',
+    },
+    [ 'dbi:Pg:dbname="foo"', 'myuser', 'mypassword',
+       { loader_class => 'MyLoader' } # optionally
+    ],
+);
+```
+
+```sh
+dbicdump -o dump_directory=./lib \
+         -o components='["InflateColumn::DateTime"]' \
+         -o debug=1 \
+         My::Schema \
+         'dbi:Pg:dbname=foo' \
+         myuser \
+         mypassword
+```
+
+---
+
+# SQL::Translator
+
+```perl
+$schema->deploy();
+```
+
+---
+
 # Memcached
 
 ```perl
@@ -642,3 +688,18 @@ my $collection = $database->get_collection( 'bar' );
 my $id         = $collection->insert({ some => 'data' });
 my $data       = $collection->find_one({ _id => $id });
 ```
+
+---
+
+# ДЗ 7
+
+DBI:
+* while { fetch }  запроса с параметрами
+* selectall запроса с параметрами
+
+DBIx::Class
+* search с join
+* search с prefetch
+* Result-метод
+* ResultSet-метод
+* create, update, delete
