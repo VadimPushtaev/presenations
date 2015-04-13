@@ -358,6 +358,7 @@ my $count = $schema->resultset('User')->search({
 
 # select — advanced
 
+```perl
 $resultset->search({
   date => { '>' => \'NOW()' },
 });
@@ -375,6 +376,7 @@ my @albums = $schema->resultset('Album')->search({
     artist => 'Starchildren',
   ],
 });
+```
 
 ---
 
@@ -392,10 +394,10 @@ __PACKAGE__->has_many(
     'user_id'
 );
 
-package Local::Schema::Visit;
+package Local::Schema::Dog;
 use base qw(DBIx::Class::Core);
 
-__PACKAGE__->table('visit');
+__PACKAGE__->table('dog');
 __PACKAGE__->add_columns(...);
 __PACKAGE__->set_primary_key('id');
 __PACKAGE__->belongs_to(
@@ -429,10 +431,6 @@ $rs = $schema->resultset('Dog')->search({
 });
 ```
 
-```perl
-{join => {user => 'account'}}
-```
-
 ---
 
 # prefetch
@@ -456,7 +454,7 @@ $rs = $schema->resultset('User')->search({}, {
 # Custom methods
 
 ```perl
-my @women = $schema->result('User')->search_women()->all();
+my @women = $schema->resultset('User')->search_women()->all();
 
 foreach my $woman (@women) {
   $woman->log('was selected');
