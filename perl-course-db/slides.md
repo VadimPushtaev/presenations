@@ -548,3 +548,99 @@ my @cities = $schema->resultset('User')->find(81858)->visited_cities;
 ```
 
 ---
+
+# storage
+
+```perl
+$schema->storage->debug(1);
+$schema->storage->dbh();
+```
+
+---
+
+# Memcached
+
+```perl
+use Cache::Memcached::Fast;
+
+my $memd = Cache::Memcached::Fast->new({
+  servers => [ { address => 'localhost:11211', weight => 2.5 },
+               '192.168.254.2:11211',
+               '/path/to/unix.sock' ],
+  namespace => 'my:',
+  connect_timeout => 0.2,
+  # ...
+});
+```
+
+---
+
+# Memached — operations
+
+```perl
+$memd->add('skey', 'text');
+$memd->set('nkey', 5, 60);
+$memd->incr('nkey');
+$memd->get('skey');
+```
+
+---
+
+# Tarantool
+
+```perl
+my $box =  MR::Tarantool::Box->new({
+    servers => "127.0.0.1:33013",
+    name    => "My Box",              # mostly used for debug purposes
+    spaces => [ {
+        indexes => [ {
+            index_name   => 'idx1',
+            keys         => [0],
+        }, {
+            index_name   => 'idx2',
+            keys         => [1,2],
+        }, ],
+        space         => 1,
+        name          => "primary",
+        default_index => 'idx1',
+        fields        => [qw/ id f2 field3 f4 f5 f6 f7 f8 misc_string /],
+    }, {
+        #...
+    } ],
+    default_space => "primary",
+ 
+    timeout   => 1.0,
+    retry     => 3,
+    debug     => 9,
+    raise     => 0,
+});
+```
+
+---
+
+# Tarantool — usage
+
+```perl
+$bool  = $box->Insert(1, 2,3, 4,5,6,7,8,"asdf");
+
+@tuples = $box->Select(1,2,3);
+$tuples = $box->Select([1,2,3],{space => "primary", use_index => "idx1"});
+
+$bool  = $box->UpdateMulti(1,[ f4 => add => 3 ]);
+
+$bool  = $box->Delete(1);
+```
+
+---
+
+# MongoDB
+
+```perl
+use MongoDB;
+
+my $client     = MongoDB::MongoClient->new(host => 'localhost', port => 27017);
+my $database   = $client->get_database( 'foo' );
+my $collection = $database->get_collection( 'bar' );
+my $id         = $collection->insert({ some => 'data' });
+my $data       = $collection->find_one({ _id => $id });
+```
