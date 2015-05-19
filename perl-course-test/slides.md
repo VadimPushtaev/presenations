@@ -261,3 +261,260 @@ new_ok("Dog" => ['Pluto', 42]);
 ---
 
 # subtest
+
+```perl
+subtests sinus => sub {
+  is(Sin(0), 0, 'zero');
+  is(Sin(PI/2), 1, 'pi/2');
+};
+```
+
+```bash
+1..1
+    # Subtest: sinus
+    ok 1 - zero
+    ok 2 - pi/2
+    1..3
+ok 1 - sinus
+
+```
+
+---
+
+# pass, fail
+
+```perl
+my $name = '...';
+pass($name);
+fail($name);
+```
+
+---
+
+# require_ok, use_ok
+
+```perl
+require_ok 'My::Module';
+require_ok 'My/Module.pm';
+
+BEGIN { use_ok('Some::Module', qw(foo bar)) }
+```
+
+---
+
+# is_deeply
+
+```perl
+is_deeply(
+  {1 => [1,2,3]},
+  {1 => [1,2,3]},
+  '...'
+);
+```
+
+---
+
+# diag, note
+
+```perl
+pass('A');
+pass('B');
+
+diag('DIAG');
+note('NOTE');
+
+pass('C');
+pass('D');
+```
+
+```bash
+1..4
+ok 1 - A
+ok 2 - B
+# DIAG
+# NOTE
+ok 3 - C
+ok 4 - D
+```
+
+```bash
+T.pm .. 1/4 # DIAG
+T.pm .. ok
+All tests successful.
+Files=1, Tests=4,  0 wallclock secs (...)
+Result: PASS```
+
+---
+
+# explain
+
+```perl
+sub explain {
+    my $self = shift;
+ 
+    return map {
+        ref $_
+          ? do {
+            $self->_try(sub { require Data::Dumper }, die_on_fail => 1);
+ 
+            my $dumper = Data::Dumper->new( [$_] );
+            $dumper->Indent(1)->Terse(1);
+            $dumper->Sortkeys(1) if $dumper->can("Sortkeys");
+            $dumper->Dump;
+          }
+          : $_
+    } @_;
+}
+```
+
+---
+
+# SKIP
+
+```perl
+use Test::More tests => 4;
+
+SKIP: {
+  skip('because we are learning', 4) if 1;
+
+  fail('A');
+  fail('B');
+  pass('C');
+  pass('D');
+}
+```
+
+```bash
+1..4
+ok 1 # skip because we are learning
+ok 2 # skip because we are learning
+ok 3 # skip because we are learning
+ok 4 # skip because we are learning
+```
+
+---
+
+# TODO
+
+```perl
+TODO: {
+  local $TODO = 'we are learning';
+  f1ail('A'); fail('B'); pass('C'); pass('D');
+}
+```
+
+```bash
+1..4
+not ok 1 - A # TODO we are learning
+#   Failed (TODO) test 'A'
+#   at T.pm line 6.
+not ok 2 - B # TODO we are learning
+#   Failed (TODO) test 'B'
+#   at T.pm line 7.
+ok 3 - C # TODO we are learning
+ok 4 - D # TODO we are learning
+```
+
+```bash
+All tests successful.
+
+Test Summary Report
+-------------------
+T.pm (Wstat: 0 Tests: 4 Failed: 0)
+  TODO passed:   3-4
+Files=1, Tests=4,  0 wallclock secs (...)
+Result: PASS
+```
+
+---
+
+# todo_skip
+
+```perl
+TODO: {
+  local $TODO = 'we are learning';
+
+  todo_skip('Learning!', 4);
+
+  fail('A');
+  fail('B');
+  pass('C');
+  pass('D');
+}
+```
+
+```bash
+not ok 1 # TODO & SKIP Learning!
+not ok 2 # TODO & SKIP Learning!
+not ok 3 # TODO & SKIP Learning!
+not ok 4 # TODO & SKIP Learning!
+```
+
+---
+
+# BAIL_OUT
+
+```perl
+require_ok($module) or BAIL_OUT("Can't load $module");
+```
+
+---
+
+# Test::Class
+
+```perl
+package My::Cube::Test;
+use base qw(Test::Class);
+use Test::More;
+use My::Cube;
+
+sub test_volume : Test(2)
+{
+  my ($self) = @_;
+
+  my $cube = My::Cube->new(x => 2);
+  is($cube->volume, 8, 'regular cube');
+
+  $cube->x(0);
+  is($cube->volume, 0, 'trivial cube');
+
+  return;
+}
+
+sub test_diagonal : Test(4)
+{ ... }
+```
+
+---
+
+# setup, teardown
+
+```perl
+package My::Cube::Test;
+use base qw(Test::Class);
+use Test::More;
+use My::Cube;
+
+sub init_cube : Test(setup)
+{
+  my ($self) = @_;
+
+  $self->{cube} = My::Cube->new(x => 2);
+}
+
+sub test_volume : Test(2)
+{
+  my ($self) = @_;
+
+  is($self->{cube}->volume, 8, 'regular cube');
+  $self->{cube}->x(0);
+  is($self->{cube}->volume, 0, 'trivial cube');
+
+  return;
+} 
+
+sub test_diagonal : Test(4)
+{ ... }
+```
+
+---
