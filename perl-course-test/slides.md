@@ -518,3 +518,250 @@ sub test_diagonal : Test(4)
 ```
 
 ---
+
+# startup, shutdown
+
+```perl
+use My::Test;
+use base qw(Test::Class);
+
+sub db_connect : Test(startup) {
+    shift->{dbi} = DBI->connect;
+}
+ 
+sub db_disconnect : Test(shutdown) {
+    shift->{dbi}->disconnect;
+}
+```
+
+```perl
+package My::Some::Module::Test;
+use base qw(My::Test);
+```
+
+---
+
+# Test::Class::Load
+
+```perl
+use Foo::Test;
+use Foo::Bar::Test;
+use Foo::Fribble::Test;
+use Foo::Ni::Test;
+Test::Class->runtests;
+```
+
+```perl
+use Test::Class::Load qw(t/tests t/lib);
+Test::Class->runtests;
+```
+
+```perl
+package My::Test::Class;
+ 
+use strict;
+use warnings;
+ 
+use base 'Test::Class';
+ 
+INIT { Test::Class->runtests }
+ 
+1;
+```
+
+---
+
+# TEST DESCRIPTIONS
+
+```perl
+sub one_plus_one_is_two : Test {
+    is 1+1, 2;
+}
+```
+
+```bash
+ok 1 - one plus one is two
+```
+
+---
+
+# TODO
+
+```perl
+sub live_test : Test  {
+    local $TODO = "live currently unimplemented";
+    ok(Object->live, "object live");
+}
+```
+
+---
+
+# Наследование
+
+```perl
+package My::Test;
+use base qw(Test::Class);
+
+package My::Some::Module::Test;
+use base qw(My::Test);
+sub SKIP_CLASS { 1 }
+
+package My::Some::Module::A::Test;
+use base (My::Some::Module::Test);
+
+package My::Some::Module::B::Test;
+use base (My::Some::Module::Test);
+```
+
+---
+
+# Организация
+
+```perl
+use Local::OK::Post;
+use Local::OK::Post::Test;
+```
+
+```bash
+lib/Local/OK/Post.pm
+t/lib/Local/OK/Post/Test.pm
+t/class.t
+```
+
+---
+
+# Test::Class::Moose
+
+```perl
+package TestsFor::DateTime;
+use Test::Class::Moose;
+use DateTime;
+
+# methods that begin with test_ are test methods.
+sub test_constructor {
+    my $test = shift;
+    $test->test_report->plan(3);    # strictly optional
+
+    can_ok 'DateTime', 'new';
+    my %args = (
+        year  => 1967,
+        month => 6,
+        day   => 20,
+    );
+    isa_ok my $date = DateTime->new(%args), 'DateTime';
+    is $date->year, $args{year}, '... and the year should be correct';
+}
+
+1;
+```
+
+---
+
+# Fixtures
+
+```perl
+use Test::DBIx::Class;
+use DBIx::Class::Schema::PopulateMore;
+```
+
+```perl
+$schema->resultset($source_name)->populate([...]);
+```
+
+---
+
+# ...::PopulateMore
+
+```perl
+    my $setup_rows = [
+        {Gender => {
+                fields => 'label',
+                data => {
+                        male => 'male',
+                        female => 'female',
+                }}},
+        {Person => {
+                fields => ['name', 'age', 'gender'],
+                data => {
+                        john => ['john', 38, "!Index:Gender.male"],
+                        jane => ['jane', 40, '!Index:Gender.female'],
+                }}},
+        {FriendList => {
+                fields => ['person', 'friend', 'created_date'],
+                data => {
+                        john_jane => [
+                                '!Index:Person.john',
+                                '!Index:Person.jane'
+                                '!Date: March 30, 1996',
+                        ],
+                }}},
+    ];
+```
+
+---
+
+# DBIx::Class::Factory :-)
+
+```perl
+package My::UserFactory;
+use base qw(DBIx::Class::Factory);
+ 
+__PACKAGE__->resultset(My::Schema->resultset('User'));
+__PACKAGE__->fields({
+    name => __PACKAGE__->seq(sub {'User #' . shift}),
+    status => 'new',
+});
+ 
+package My::SuperUserFactory;
+use base qw(DBIx::Class::Factory);
+ 
+__PACKAGE__->base_factory('My::UserFactory');
+__PACKAGE__->field(superuser => 1);
+```
+
+```perl
+my $user = My::UserFactory->create();
+my @verified_users = @{My::UserFactory->create_batch(3, {status => 'verified'})};
+ 
+my $superuser = My::SuperUserFactory->build();
+$superuser->insert();
+```
+
+---
+
+# Test::MockModule;
+
+```perl
+use Module::Name;
+use Test::MockModule;
+
+{
+    my $module = Test::MockModule->new('Module::Name');
+    $module->mock('subroutine', sub { ... });
+    Module::Name::subroutine(@args); # mocked
+}
+
+Module::Name::subroutine(@args); # original subroutine
+```
+
+---
+
+# Test::MockObject;
+
+```perl
+use Test::MockObject;
+  my $mock = Test::MockObject->new();
+  $mock->set_true( 'somemethod' );
+  ok( $mock->somemethod() );
+ 
+  $mock->set_true( 'veritas')
+       ->set_false( 'ficta' )
+       ->set_series( 'amicae', 'Sunny', 'Kylie', 'Bella' );
+```
+
+---
+
+# ДЗ 11
+
+* .t-тест для задания про геометрические фигуры
+* `Test::Class`-тест для парсера Одноклассников
