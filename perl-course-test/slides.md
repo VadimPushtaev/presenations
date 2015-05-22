@@ -657,6 +657,110 @@ sub test_constructor {
 
 ---
 
+# Test::Deep
+
+```perl
+my $name_re = re('^(Mr|Mrs|Miss) \w+ \w+$');
+cmp_deeply(
+  $person,
+  {
+    Name => $name_re,
+    Phone => re(q{^0d{6}$}),
+    ChildNames => array_each($name_re)
+  },
+  "person ok"
+);
+```
+
+---
+
+# cmp_deeply
+
+```perl
+cmp_deeply(
+  [{1 => 2}, {3 => 4}],
+  [{1 => 2}, {3 => 4}],
+);
+```
+
+---
+
+# ignore()
+
+```perl
+cmp_deeply(
+  [{1 => 2}, {3 => 4}],
+  [{1 => 2}, {3 => ignore()}],
+);
+```
+
+---
+
+# methods
+
+```perl
+cmp_deeply(
+  $obj,
+  methods(name => "John", ["favourite", "food"] => "taco")
+);
+```
+
+```perl
+cmp_deeply(
+  $obj,
+  listmethods(
+    name => "John",
+    ["favourites", "food"] => ["Mapo tofu", "Gongbao chicken"]
+  )
+);
+```
+
+---
+
+# re
+
+```perl
+cmp_deeply($got, [ re("ferg") ])
+```
+
+---
+
+# bag
+
+```perl
+cmp_deeply([1, 2, 2], bag(2, 2, 1))
+```
+
+---
+
+# all, any
+
+```perl
+cmp_deeply($got, all(isa("Person"), methods(name => 'John')))
+
+any( re("^wi"), all(isa("Person"), methods(name => 'John')) )
+
+re("^wi") | isa("Person") & methods(name => 'John')
+```
+
+---
+
+# array_each
+
+```perl
+my $common_tests = all(
+   isa("MyFile"),
+   methods(
+     handle => isa("IO::Handle")
+     filename => re("^/home/ted/tmp"),
+  )
+);
+ 
+cmp_deeply($got, array_each($common_tests));
+```
+
+---
+
 # Fixtures
 
 ```perl
@@ -726,6 +830,15 @@ my @verified_users = @{My::UserFactory->create_batch(3, {status => 'verified'})}
 my $superuser = My::SuperUserFactory->build();
 $superuser->insert();
 ```
+
+---
+
+# Test Double
+
+* Stub
+* Spy
+* Mock
+* Double
 
 ---
 
