@@ -220,7 +220,7 @@ isnt($result, 'error', '...');
 ```perl
 like($error, qr/forbidden/, '...');
 
-like($error, qr/forbidden/, '...');
+unlike($error, qr/forbidden/, '...');
 ```
 
 ---
@@ -399,7 +399,7 @@ ok 4 # skip because we are learning
 ```perl
 TODO: {
   local $TODO = 'we are learning';
-  f1ail('A'); fail('B'); pass('C'); pass('D');
+  fail('A'); fail('B'); pass('C'); pass('D');
 }
 ```
 
