@@ -412,7 +412,7 @@ sub m6 { shift() ** 6 }
 ```perl
 use Local::Multiplier;
 
-print m3(5); # 125 
+print m3(5); # 125
 print Local::Multiplier::m3(5); # 125
 ```
 
@@ -436,7 +436,7 @@ sub m6 { shift() ** 6 }
 ```perl
 use Local::Multiplier qw(m3);
 
-print m3(5); # 125 
+print m3(5); # 125
 print Local::Multiplier::m4(5); # 625
 ```
 
