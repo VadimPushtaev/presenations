@@ -598,7 +598,7 @@ print Dumper [test]; # 'test'
 
 ```perl
 sub test {
-  return 'str'
+  return 'str';
 }
 print Dumper [test]; # 'str'
 ```
