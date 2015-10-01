@@ -497,7 +497,8 @@ BEGIN failed--compilation aborted at -e line 1.
 # sub VERSION
 
 ```perl
-use Local::Module 500; # Local::Module::VERSION('Local::Module', 500);
+use Local::Module 500;
+# Local::Module::VERSION('Local::Module', 500);
 ```
 
 ```perl
@@ -789,7 +790,7 @@ $VAR1 = {
                        |
 Foo:: -----> bar  -----+------> CODE   - &bar
                        |
-                       +------> IO     - file and dir handle
+                       +------> IO     - filehandle
                        |
                        +------> GLOB   - *bar
 ```
@@ -799,12 +800,12 @@ Foo:: -----> bar  -----+------> CODE   - &bar
 # Typeglob — операции
 
 ```perl
- *Some::Package::foo = *Some::Package::var
+*Some::Package::foo = *Some::Package::var
 
- *Some::Package::foo = \$bar;
- *Some::Package::foo = \@bar;
+*Some::Package::foo = \$bar;
+*Some::Package::foo = \@bar;
 
- *Some::Packge::func = sub { ... }
+*Some::Packge::func = sub { ... }
 ```
 
 ---
@@ -812,48 +813,19 @@ Foo:: -----> bar  -----+------> CODE   - &bar
 # caller
 
 ```perl
-    # 0         1          2
-    ($package, $filename, $line) = caller;
+# 0         1          2
+($package, $filename, $line) = caller;
 ```
 
 ```perl
-    #  0         1          2      3            4
-    ($package, $filename, $line, $subroutine, $hasargs,
-    #  5          6          7            8       9         10
-    $wantarray, $evaltext, $is_require, $hints, $bitmask, $hinthash)
-     = caller($i);
+(
+	$package,    $filename,   $line,
+	$subroutine, $hasargs,    $wantarray,
+	$evaltext,   $is_require, $hints,
+	$bitmask,    $hinthash
+) = caller($i);
 ```
 
----
-
-# namespace::clean
-
-```perl
-package Foo;
-use warnings;
-use strict;
-
-use Carp qw(croak);   # 'croak' will be removed
-
-sub bar { 23 }        # 'bar' will be removed
-
-# remove all previously defined functions
-use namespace::clean;
-
-sub baz { bar() }     # 'baz' still defined, 'bar' still bound
-
-# begin to collection function names from here again
-no namespace::clean;
-
-sub quux { baz() }    # 'quux' will be removed
-
-# remove all functions defined after the 'no' unimport
-use namespace::clean;
-```
-
-```perl
-use namespace::autoclean
-```
 ---
 
 # AUTOLOAD
@@ -869,8 +841,11 @@ use namespace::autoclean
   }
 }
 
-print Some::Package::foo();  # 'Some::Package::foo'
-print Some::Package::test(); # 'Some::Package::test'
+print Some::Package::foo();
+# 'Some::Package::foo'
+
+print Some::Package::test();
+# 'Some::Package::test'
 ```
 
 ---
@@ -882,7 +857,7 @@ print Some::Package::test(); # 'Some::Package::test'
   package Test;
   our $x = 123;
 
-  sub bark { our $x; print $x }
+  sub bark { print $x }
 }
 
 Test::bark(); # 123
@@ -1136,36 +1111,51 @@ WriteMakefile(
 # ДЗ 3.1
 
 ```perl
-use Local::PerlCourse::Homework qw(homework1 homework2);
+# http://jsonlines.org/
+# use JSON;
 
-homework1();
+use Local::PerlCourse::JSONL qw(
+  encode_jsonl
+  decode_jsonl
+);
+
+$string = encode_jsonl($array_ref);
+$array_ref = decode_jsonl($string);
 ```
+
 ---
 
 # ДЗ 3.2
 
 ```perl
-use Local::PerlCourse::Currency qw(
+use Local::PerlCourse::Currency;
+
+Local::PerlCourse::Currency::set_rate(
   usd => 1,
   rur => 65.44,
   eur => 1.2,
   # ...
 );
 
-# 3.2.1
-Local::PerlCourse::Currency::rur_to_usd(2); # 65.44 * 2
+$rur = Local::PerlCourse::Currency::usd_to_rur(42);
+$cny = Local::PerlCourse::Currency::gbp_to_cny(30);
+```
 
-# 3.2.2.
-sub sum   { 4.5 }
-sub price { 5 }
-# ...
+---
 
-Local::PerlCourse::Currency::generate_functions(
-  ['sum',   rur => 'usd'],
-  ['price', usd => 'eur'],
-  # ...
-);
+# ДЗ 3.3
 
-sum_usd();
-price_eur();
+```perl
+package Local::SomePackage;
+
+use Local::PerlCourse::GetterSetter qw(a x);
+# scalar only
+
+our $a = 42;
+get_a(); # 42
+set_a(11);
+get_a(); # 11
+
+set_x(50);
+$Local::SomePackage::x; # 50
 ```
