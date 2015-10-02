@@ -94,17 +94,8 @@ m_3(2); # 6
 # Файл модуля
 
 ```perl
-# Unix
-
 require Module; # Module.pm
-
 require Module::My # Module/My.pm
-
-# Windows
-
-require Module; # Module.pm
-
-require Module::My # Module\My.pm
 ```
 
 ---
@@ -147,24 +138,23 @@ $ perl -I /tmp/lib ...
 
 # BEGIN
 
+.not[
 ```perl
 BEGIN {
   require Some::Module;
 }
 
-print(test1());
-print(test2());
-
 sub test1 {
   return 'test1';
 
-  sub test2 {
-    return 'test2';
-
-    BEGIN {...}
-  }
+* sub test2 {
+*   return 'test2';
+*
+*   BEGIN {...}
+* }
 }
 ```
+]
 
 ---
 
@@ -305,12 +295,10 @@ print join(' ', @Some::array); # 'foo bar baz'
 
 ```perl
 my $x = 4;
-
 {
   my $x = 5;
   print $x; # 5
 }
-
 print $x; # 4
 ```
 
@@ -319,7 +307,6 @@ use feature 'state';
 
 sub test {
   state $x = 42;
-
   return $x++;
 }
 
@@ -356,12 +343,14 @@ use Another::Module qw(param1 param2);
 ```perl
 BEGIN {
   require Module;
-  Module::import('Module', LIST);
+  Module->import(LIST);
+  # ~ Module::import('Module', LIST);
 }
 ```
 
 ```perl
 use Module ();
+# BEGIN { require Module; }
 ```
 ---
 
@@ -488,7 +477,8 @@ use Local::Module 1.5;
 
 ```
 $ perl -e 'use Data::Dumper 500'
-Data::Dumper version 500 required--this is only version 2.130_02 at -e line 1.
+Data::Dumper version 500 required--
+this is only version 2.130_02 at -e line 1.
 BEGIN failed--compilation aborted at -e line 1.
 ```
 
@@ -498,7 +488,8 @@ BEGIN failed--compilation aborted at -e line 1.
 
 ```perl
 use Local::Module 500;
-# Local::Module::VERSION('Local::Module', 500);
+# Local::Module->VERSION(500);
+# ~ Local::Module::VERSION('Local::Module', 500);
 ```
 
 ```perl
@@ -688,15 +679,6 @@ $ perl -E 'say 500**50'
 
 ---
 
-# use if;
-
-```perl
-use if $] < 5.016, 'My::Module';
-use if $] >= 5.016, 'My::Module::New';
-```
-
----
-
 # Содержание
 
 1. "include"
@@ -790,7 +772,7 @@ $VAR1 = {
                        |
 Foo:: -----> bar  -----+------> CODE   - &bar
                        |
-                       +------> IO     - filehandle
+                       +------> IO     - bar (FH)
                        |
                        +------> GLOB   - *bar
 ```
@@ -800,12 +782,12 @@ Foo:: -----> bar  -----+------> CODE   - &bar
 # Typeglob — операции
 
 ```perl
-*Some::Package::foo = *Some::Package::var
-
-*Some::Package::foo = \$bar;
-*Some::Package::foo = \@bar;
-
-*Some::Packge::func = sub { ... }
+ *Some::Package::foo = *Some::Package::var
+ 
+ *Some::Package::foo = \$bar;
+ *Some::Package::foo = \@bar;
+ 
+ *Some::Packge::func = sub { ... }
 ```
 
 ---
@@ -980,7 +962,14 @@ perl -MCPAN -e shell
 # Утилита cpanm
 
 ```sh
-curl -L https://cpanmin.us | perl - --sudo App::cpanminus
+curl -L https://cpanmin.us | \
+    perl - --sudo App::cpanminus
+```
+
+```sh
+cpanm Data::Printer
+cpanm MIYAGAWA/Plack-0.99_05.tar.gz
+cpanm ~/dists/MyCompany-Enterprise-1.00.tar.gz
 ```
 
 ---
@@ -1128,9 +1117,9 @@ $array_ref = decode_jsonl($string);
 # ДЗ 3.2
 
 ```perl
-use Local::PerlCourse::Currency;
+use Local::PerlCourse::Currency qw(set_rate);
 
-Local::PerlCourse::Currency::set_rate(
+set_rate(
   usd => 1,
   rur => 65.44,
   eur => 1.2,
@@ -1148,14 +1137,14 @@ $cny = Local::PerlCourse::Currency::gbp_to_cny(30);
 ```perl
 package Local::SomePackage;
 
-use Local::PerlCourse::GetterSetter qw(a x);
+use Local::PerlCourse::GetterSetter qw(x y);
 # scalar only
-
-our $a = 42;
-get_a(); # 42
-set_a(11);
-get_a(); # 11
 
 set_x(50);
 $Local::SomePackage::x; # 50
+
+our $y = 42;
+get_y(); # 42
+set_y(11);
+get_y(); # 11
 ```
